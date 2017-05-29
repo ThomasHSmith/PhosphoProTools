@@ -7,10 +7,10 @@ def readme():
 setup(name='phosphoprotools',
       version='0.1',
       description='Tools for phosphoproteomics data analysis',
-      long_description='Collection of functions for processing phosphoproteomics data,\
-                        including annotation of phospho-sites using PhosRS cutoff value,\
-                        annotation of functional sites, retrieval of synonyms, publication\
-                        counts, statistical analysis (by pi-score method), and more.',
+      long_description='Collection of functions for processing phosphoproteomics data,',\
+                       'including annotation of phospho-sites using PhosRS cutoff value,',\
+                       'annotation of functional sites, retrieval of synonyms, publication',\
+                       'counts, statistical analysis (by pi-score method), and more.',
       classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',

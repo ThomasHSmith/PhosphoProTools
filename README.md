@@ -15,7 +15,7 @@ This is a set of simple scripts that I wrote for the purpose of parsing/aggregat
 Aside from Tqdm, all of these are included in the Anaconda distribution of Python 2.7 (https://www.continuum.io/downloads)
 
 #### Installation
-
+`pip install phosphoprotools`
 
 #### Other Requirements
  For functional site annotation, you will need to download three files from the PhosphoSitePlus database (http://www.phosphosite.org/staticDownloads.action).  After registering for a free account, download the following files:
@@ -44,6 +44,11 @@ Unzip each file and  save to `PhosphoProTools/src/phosphoprotools/data`, make su
 	        ├── siteannotation.py
 	        └── synonymsfetch.py
 
+
+## TODO
+- Finish up comments
+- Add example ipynb
+- Add sample data for testing
 
 ## Authors
 
