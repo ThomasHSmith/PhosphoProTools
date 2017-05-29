@@ -9,11 +9,12 @@ import urllib2
 from urllib2 import HTTPError, URLError
 from multiprocessing.dummy import Pool as ThreadPool
 from requests.exceptions import ReadTimeout
-import referencedbprocessing
+from data import refdbprocessing
 import pkg_resources
 import os
 
 # import reference sequences DataFrame
+print '\nLoading reference sequences...'
 pickle = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.pickle')
 if os.path.isfile(pickle):
     DF_SEQS = pd.read_pickle(pickle)
@@ -21,14 +22,16 @@ if os.path.isfile(pickle):
 else:
     in_file = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.fasta')
     if os.path.isfile(in_file):
-        DF_SEQS = referencedbprocessing.import_fasta_seqs(in_file)
+        DF_SEQS = refdbprocessing.import_fasta_seqs(in_file)
         print 'Loaded reference sequences from PhosphoSite file. Saved pickle',\
               'for future use.'
     else:
         print 'Missing pickle or PhosphoSite file for reference sequences. Download',\
-              '"Phosphosite_seq.fasta" from http://www.phosphosite.org/staticDownloads.action'
+              '"Phosphosite_seq.fasta" from http://www.phosphosite.org/staticDownloads.action',\
+              'and save unzipped files as: %s' % in_file
 
 # import known regulatory sites DataFrame
+print '\nLoading known regulatory sites...'
 pickle = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites.pickle')
 if os.path.isfile(pickle):
     DF_REG = pd.read_pickle(pickle)
@@ -36,14 +39,16 @@ if os.path.isfile(pickle):
 else:
     in_file = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites')
     if os.path.isfile(in_file):
-        DF_REG = referencedbprocessing.import_reported_sites(in_file)
+        DF_REG = refdbprocessing.import_reported_sites(in_file)
         print 'Loaded known functional/regulatory sites data from PhosphoSite file. Saved',\
               'pickle for future use.'
     else:
         print 'Missing pickle or PhosphoSite file for known functional/regulatory sites. Download',\
-              '"Regulatory_sites" file from http://www.phosphosite.org/staticDownloads.action'
+              '"Regulatory_sites" file from http://www.phosphosite.org/staticDownloads.action',\
+              'and save unzipped files as: %s' % in_file
 
 # import known sites DataFrame
+print '\nLoading known phosphosites...'
 pickle = pkg_resources.resource_filename(__name__, 'data/Phosphorylation_site_dataset.pickle')
 if os.path.isfile(pickle):
     DF_REPORTED = pd.read_pickle(pickle)
@@ -51,11 +56,13 @@ if os.path.isfile(pickle):
 else:
     in_file = pkg_resources.resource_filename(__name__, 'data/Phosphorylation_site_dataset')
     if os.path.isfile(in_file):
-        DF_REPORTED = referencedbprocessing.import_reported_sites(in_file)
+        DF_REPORTED = refdbprocessing.import_reported_sites(in_file)
         print 'Loaded known phosphosites data from PhosphoSite file.  Saved pickle for future use.'
     else:
         print 'Missing pickle or PhosphoSite file for known phosphosites. Download',\
-              '"Phosphorylation_site_dataset" from http://www.phosphosite.org/staticDownloads.action'
+              '"Phosphorylation_site_dataset" from http://www.phosphosite.org/staticDownloads.action',\
+              'and save unzipped files as: %s' % in_file
+
 
 
 def _webfetch_uniprot_seq(protein):
