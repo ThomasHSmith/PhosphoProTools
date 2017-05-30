@@ -26,7 +26,7 @@ def _unzip_source_file(gz_in_filepath):
         with open(out_filepath, 'wb') as out_file:
             for line in in_file:
                 out_file.write(line)
-    print 'Extraacted compressed file to %s. Original .gz file can now be deleted.' % (out_filepath, gz_in_filepath)
+    print 'Extraacted compressed file to %s. Original .gz file %s can now be deleted.' % (out_filepath, gz_in_filepath)
     return out_filepath
 
 def _find_file(_infile):
