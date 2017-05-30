@@ -1,9 +1,14 @@
 # PhosphoproteomicsAnalysis
+Collection of functions for processing phosphoproteomics data, including:
 
-This is a set of simple scripts that I wrote for the purpose of parsing/aggregating, filtering, and visualizing open-access RNA-Seq gene expression data obtained from the National Cancer Institute Genomic Data Commons (NCI-GDC, <https://gdc-portal.nci.nih.gov>).  I have specifically used it for the TCGA project datasets.
-
+ - Annotate phospho-sites using PhosRS cutoff value
+ - Retrieve Gene/Protein synonyms from Uniprot
+ - Annotate previously reported phospho-sites (as reported by PhosphoSitePlus database) 
+ - Annotate functional phospho-sites (as reported by PhosphoSitePlus database)
+ - Statistical analysis by pi-score method for differential phosphopeptide abundance between two groups
+ - Retrieve publication counts for genes with desired keywords
+               
 ## Getting Started
-
 
 #### Python Requirements
 - Python 2.7 with the following packages:
@@ -12,19 +17,19 @@ This is a set of simple scripts that I wrote for the purpose of parsing/aggregat
 - `numpy`
 - `scipy.stats` 
 
-Aside from Tqdm, all of these are included in the Anaconda distribution of Python 2.7 (https://www.continuum.io/downloads)
+Aside from Tqdm, all of these are included in the Anaconda distribution of Python 2.7 (https://www.continuum.io/downloads).  Missing packages should be installed automatically as part of the pip install of the phosphoprotools package.
 
 #### Installation
 `pip install phosphoprotools`
 
 #### Other Requirements
- For functional site annotation, you will need to download three files from the PhosphoSitePlus database (http://www.phosphosite.org/staticDownloads.action).  After registering for a free account, download the following files:
+ For annotation of known/functional phosphosites, you will need to download three files from the PhosphoSitePlus database (http://www.phosphosite.org/staticDownloads.action).  After registering for a free account, download the following files to your Desktop.
  
  - Phosphorylation_site_dataset.gz (all reported functional sites)
  - Phosphosite_seq.fasta.gz (reference sequences)
  - Regulatory_sites.gz (all reported functional sites)
 
-Unzip each file and  save to `PhosphoProTools/src/phosphoprotools/data`, make sure file names match those shown below:
+When phosphoprotools is imported for the first time, the above three compessed files will be automaticallly extracted to the package `/data` directory and saved as a .pickle.  After first import the files downloaded to your Desktop can be deleted.
 	
 	PhosphoProTools
 	├── LICENSE
@@ -35,9 +40,9 @@ Unzip each file and  save to `PhosphoProTools/src/phosphoprotools/data`, make su
 	    └── phosphoprotools
 	        ├── __init__.py
 	        ├── data
-	        │   ├── Phosphorylation_site_dataset
-	        │   ├── Phosphosite_seq.fasta
-	        │   └── Regulatory_sites
+	        │   ├── Phosphorylation_site_dataset.pickle
+	        │   ├── Phosphosite_seq.fasta.pickle
+	        │   └── Regulatory_sites.pickle
 	        ├── piscoreanalysis.py
 	        ├── preprocessing.py
 	        ├── pubfetch.py

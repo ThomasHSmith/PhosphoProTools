@@ -5,7 +5,7 @@ import pandas as pd
 import os
 from numpy import mean
 
-def import_reported_sites(psites_file, save_pickle=True):
+def import_reported_sites(psites_file, data_dir_path, save_pickle=True):
     """
     Convert tsv files downloaded from PhosphoSite.org database to
     Pandas DataFrames, which will be used to retrieve info from
@@ -54,11 +54,14 @@ def import_reported_sites(psites_file, save_pickle=True):
     df = df[df['ORGANISM'] == 'human'].copy()
     df.reset_index(inplace=True, drop=True)
     if save_pickle:
-        pickle_fname = '%s.pickle' % psites_file.split('.')[0]
+        base = os.path.basename(psites_file)
+        fname = '%s.pickle' % base
+        pickle_fname = os.path.join(data_dir_path, fname)
         df.to_pickle(pickle_fname)
+        print 'Saved %s pickle to %s' % (fname, pickle_fname)
     return df
 
-def import_fasta_seqs(fasta_file, save_pickle=True):
+def import_fasta_seqs(fasta_file, data_dir_path, save_pickle=True):
     header = True
     firstEntry = True
     f = open(fasta_file)
@@ -88,7 +91,10 @@ def import_fasta_seqs(fasta_file, save_pickle=True):
     df.reset_index(inplace=True, drop=True)
     df.drop(['species', 'entry'], inplace=True, axis=1)
     if save_pickle:
-        pickle_fname = '%s.pickle' % fasta_file.split('.')[0]
+        base = os.path.basename(fasta_file)
+        fname = '%s.pickle' % base
+        pickle_fname = os.path.join(data_dir_path, fname)
         df.to_pickle(pickle_fname)
+        print 'Saved %s pickle to %s' % (fname, pickle_fname)
     return df
 

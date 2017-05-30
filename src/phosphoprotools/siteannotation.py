@@ -11,7 +11,48 @@ from multiprocessing.dummy import Pool as ThreadPool
 from requests.exceptions import ReadTimeout
 from data import refdbprocessing
 import pkg_resources
-import os
+import os, gzip, glob
+
+
+DATA_PATH = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites')
+DATA_PATH = os.path.dirname(DATA_PATH)
+
+def _unzip_source_file(gz_in_filepath):
+    base = os.path.basename(gz_in_filepath)
+    fname = '.'.join([x for x in base.split('.')[:-1]])
+#    path = os.path.dirname(gz_in_filepath)
+    out_filepath = os.path.join(DATA_PATH, fname)
+    with gzip.open(gz_in_filepath, 'rb') as in_file:
+        with open(out_filepath, 'wb') as out_file:
+            for line in in_file:
+                out_file.write(line)
+    print 'Extraacted compressed file to %s. Original .gz file can now be deleted.' % (out_filepath, gz_in_filepath)
+    return out_filepath
+
+def _find_file(_infile):
+    # First check if PhosphoSite data file is in package's /data directory
+    _fpath = pkg_resources.resource_filename(__name__, _infile)
+    if os.path.isfile(_fpath):
+        return _fpath
+    # If not, check Desktop for the file
+    else:
+        try: # Build path to desktop depending on unix vs windows OS
+            desktop_path = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
+        except KeyError:
+            desktop_path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        # Build filepath to desktop PhosphoSite data file, check if exists
+        _fpath = os.path.join(desktop_path, _infile)
+        if os.path.isfile(_fpath):
+            return _fpath
+            # If data file not on desktop, check desktop for compressed files
+        _fpath = '%s.gz' % _fpath
+        if os.path.isfile(_fpath):
+            unzipped_path = _unzip_source_file(_fpath)
+            return unzipped_path
+        else:  # If no files found, print help message
+            print('Missing pickle or original file %s. Download file from http://www.phosphosite.org/'
+                  'staticDownloads.action and place file on Desktop' % _infile)
+            return 0
 
 # import reference sequences DataFrame
 print '\nLoading reference sequences...'
@@ -20,15 +61,9 @@ if os.path.isfile(pickle):
     DF_SEQS = pd.read_pickle(pickle)
     print 'Loaded reference sequences pickle.'
 else:
-    in_file = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.fasta')
-    if os.path.isfile(in_file):
-        DF_SEQS = refdbprocessing.import_fasta_seqs(in_file)
-        print 'Loaded reference sequences from PhosphoSite file. Saved pickle',\
-              'for future use.'
-    else:
-        print 'Missing pickle or PhosphoSite file for reference sequences. Download',\
-              '"Phosphosite_seq.fasta" from http://www.phosphosite.org/staticDownloads.action',\
-              'and save unzipped files as: %s' % in_file
+    in_file = _find_file('Phosphosite_seq.fasta')
+    if in_file != 0:
+        DF_SEQS = refdbprocessing.import_fasta_seqs(in_file, DATA_PATH)
 
 # import known regulatory sites DataFrame
 print '\nLoading known regulatory sites...'
@@ -37,15 +72,9 @@ if os.path.isfile(pickle):
     DF_REG = pd.read_pickle(pickle)
     print 'Loaded known functional/regulatory sites data from pickle.'
 else:
-    in_file = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites')
-    if os.path.isfile(in_file):
-        DF_REG = refdbprocessing.import_reported_sites(in_file)
-        print 'Loaded known functional/regulatory sites data from PhosphoSite file. Saved',\
-              'pickle for future use.'
-    else:
-        print 'Missing pickle or PhosphoSite file for known functional/regulatory sites. Download',\
-              '"Regulatory_sites" file from http://www.phosphosite.org/staticDownloads.action',\
-              'and save unzipped files as: %s' % in_file
+    in_file = _find_file('Regulatory_sites')
+    if in_file != 0:
+        DF_REG = refdbprocessing.import_reported_sites(in_file, DATA_PATH)
 
 # import known sites DataFrame
 print '\nLoading known phosphosites...'
@@ -54,15 +83,9 @@ if os.path.isfile(pickle):
     DF_REPORTED = pd.read_pickle(pickle)
     print 'Loaded known phosphosites data from pickle.'
 else:
-    in_file = pkg_resources.resource_filename(__name__, 'data/Phosphorylation_site_dataset')
-    if os.path.isfile(in_file):
-        DF_REPORTED = refdbprocessing.import_reported_sites(in_file)
-        print 'Loaded known phosphosites data from PhosphoSite file.  Saved pickle for future use.'
-    else:
-        print 'Missing pickle or PhosphoSite file for known phosphosites. Download',\
-              '"Phosphorylation_site_dataset" from http://www.phosphosite.org/staticDownloads.action',\
-              'and save unzipped files as: %s' % in_file
-
+    in_file = _find_file('Phosphorylation_site_dataset')
+    if in_file != 0:
+        DF_REPORTED = refdbprocessing.import_reported_sites(in_file, DATA_PATH)
 
 
 def _webfetch_uniprot_seq(protein):
