@@ -56,7 +56,7 @@ def _find_file(_infile):
 
 # import reference sequences DataFrame
 print '\nLoading reference sequences...'
-pickle = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.pickle')
+pickle = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.fasta.pickle')
 if os.path.isfile(pickle):
     DF_SEQS = pd.read_pickle(pickle)
     print 'Loaded reference sequences pickle.'
