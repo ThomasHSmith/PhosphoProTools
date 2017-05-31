@@ -1,10 +1,9 @@
-# Filename: statsanalysis.py
+# Filename: piscoreanalysis.py
 # Author: Thomas H. Smith 2017
 """
 Small collection of functions used for statistical analysis
 of phosphoproteomics datasets with row-wise intensity values
 with at least two replicates from each experimental condition
-v0.2
 """
 
 from scipy import stats
@@ -178,44 +177,10 @@ def pi_score_analysis(_df, ctrl_cols, treated_cols, add_f_test_col=False, fc_rep
 
     if add_alpha_level_col:
         print 'Assigning alpha significance level values...'
-        #critvals = {0.05:1.1082, 0.02:1.6657, 0.01:2.1270, 0.005:2.6138, 0.002:3.29839,
-        #            0.001:3.8434, 0.0005:4.4122, 0.0002:5.1559, 0.0001:5.7964}
-        #alpha_levels = [0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001]
-        #df_in[alpha_col] = ones(len(df_in))
-        #alpha_cols.sort(reverse=True)
-        #for level in alpha_levels:
-        #    df_in[alpha_col] = df_in.apply((lambda row:
-        #                                      level if ((row[pi_score] >= critvals[level])
-        #                                                & (row[alpha_col] > level))
-        #                                      else (row[alpha_col])), axis=1)
-        # ns_mask = df_in[alpha_col] == 1
-        #df_in.loc[ns_mask, alpha_col] = 'ns'
         vals_indices = df_in[~df_in[treated_cols[0]].isnull()].index
         df_in.loc[vals_indices, alpha_col] = df_in[pi_score].apply(lambda x: _assign_alpha_value(x))
 
     if summarize:
-#        total = len(df_in)
-#        total_uniq = len(df_in.Protein.unique())
-#        signif_levels = list(df_in[df_in[alpha_col] != 'ns'][alpha_col].unique())
-#        signif_levels.sort(reverse=True)
-#        n_ns = len(df_in[df_in[alpha_col] == 'ns'])
-#        ns_uniq = len(df_in[df_in[alpha_col] == 'ns'].Protein.unique())
-#        ns_pct = (float(n_ns)/total) * 100
-#        print 'ns:\t%d (%.2f%%) phosphopeptides from %d unique proteins' % (n_ns, ns_pct, ns_uniq)
-#
-#        for level in signif_levels:
-#            n_hits = len(df_in[df_in[alpha_col] == level])
-#            hits_uniq = len(df_in[df_in[alpha_col] == level].Protein.unique())
-#            pct = (float(n_hits)/total) * 100
-#            print '%s:\t%d\t(%.2f%%) phosphopeptides from %d unique proteins' % (level, n_hits,
-#                                                                                 pct, hits_uniq)
-#        print '-'*20
-#        n_sig = len(df_in[df_in[alpha_col] != 'ns'])
-#        n_sig_uniq = len(df_in[df_in[alpha_col] != 'ns'].Protein.unique())
-#        sig_pct = (float(n_sig)/total) * 100
-#        print '< 0.05:\t%s\t(%.2f%%) phosphopeptides from %d unique proteins' % (n_sig, sig_pct,
-#                                                                                 n_sig_uniq)
-#        print 'Total:\t%s' % total
         signif_slice = df_in[~df_in[alpha_col].isnull()].copy()
         total = len(signif_slice)
         alpha_levels = signif_slice[alpha_col].unique()

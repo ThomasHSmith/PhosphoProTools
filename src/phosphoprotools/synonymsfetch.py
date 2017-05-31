@@ -6,7 +6,7 @@ import pandas as pd
 import xml.dom.minidom
 import urllib2
 from urllib2 import HTTPError, URLError
-from operator import itemgetter
+#from operator import itemgetter
 from requests.exceptions import ReadTimeout
 
 

@@ -4,11 +4,10 @@
 import xml.dom.minidom
 import urllib2
 from urllib2 import HTTPError, URLError
-from operator import itemgetter
+#from operator import itemgetter
 from multiprocessing.dummy import Pool as ThreadPool
 from tqdm import tqdm_notebook
 import pandas as pd
-from pyshorteners import Shortener
 from requests.exceptions import ReadTimeout
 
 
@@ -135,27 +134,9 @@ def _get_esearch_data(search_string, return_IDs_list=False, return_link=True):
         count = int(s[i:].split(':')[1].split('"')[1])
         if return_link:
             link_url = '=HYPERLINK("%s%s",%d)' % (LINK_URL_PREFIX, search_string, count)
-#            if len(link_url) > 255:
-#                url = '%s%s' % (LINK_URL_PREFIX, search_string)
-#                api_key = 'AIzaSyBRdk9gGnyvMAe_QNiwQfRDW_1jILh_3D8'
-#                shortener = Shortener('Google', api_key=api_key)
             return (count, link_url)
         else:
             return count
-
-
-def shorten_large_links(link):
-    url = link.split('"')[1]
-    count = link.split('"')[2].split(',')[1].split(')')[0]
-    api_key = 'AIzaSyBRdk9gGnyvMAe_QNiwQfRDW_1jILh_3D8'
-    shortener = Shortener('Google', api_key=api_key)
-    try:
-        short_url = str(shortener.short(url))
-        new_link = '=HYPERLINK("%s", %s)' % (short_url, count)
-        return new_link
-    except ReadTimeout:
-        print 'Caught readtimeout error for %s' % link
-        return link
 
 
 # called by each thread

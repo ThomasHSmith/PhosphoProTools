@@ -11,7 +11,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 from requests.exceptions import ReadTimeout
 from data import refdbprocessing
 import pkg_resources
-import os, gzip, glob
+import os, gzip
 
 
 DATA_PATH = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites')
