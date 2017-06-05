@@ -11,70 +11,8 @@ import pandas as pd
 from requests.exceptions import ReadTimeout
 
 
-
-def pubmed_pub_count(term1_list, term2_list, get_pmids_list=False):
-    base_url = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term='
-    base_link_url = 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
-    term1_string = '(%s)' % term1_list[0]
-    if len(term1_list) > 1:
-        for term in term1_list[1:]:
-            term1_string = '%s OR (%s)' % (term1_string, term)
-    term2_string = '(%s)' % term2_list[0]
-    if len(term2_list) > 1:
-        for term in term2_list[1:]:
-            term2_string = '%s OR (%s)' % (term2_string, term)
-
-    search_string = '(%s) AND (%s)' % (term1_string, term2_string)
-    search_string = search_string.replace(' ', '+')
-    url = '%s%s&retmax=100000' % (base_url, search_string)
-    link_url = base_link_url + search_string
-    try:
-        fp = urllib2.urlopen(url)
-        doc = xml.dom.minidom.parse(fp)
-    except URLError, HTTPError:
-        print 'Caught exception for %s' % term1_string
-        return ['na', 0]
-
-    res = doc.getElementsByTagName('eSearchResult')
-    c = res[0].getElementsByTagName('Count')
-    count = int(c[0].childNodes[0].data)
-    print search_string
-    print count
-    print link_url
-    if get_pmids_list == False:
-        return [count, link_url]
-    else:
-        idList = doc.getElementsByTagName('IdList')
-        id_nodes = idList[0].getElementsByTagName('Id')
-        ids_list = []
-        for pmid in id_nodes:
-            ids_list.append(str(pmid.childNodes[0].data))
-        return ids_list
-
-
-
-    """
-    Add number of publications associated with gene names
-    and synonyms.
-
-    Parameters
-    ----------
-    _df : pandas.DataFrame
-        DataFrame containing dataset.
-    as_links : boolean, optional
-        Whether to format data as a string that will be interpreted
-        as a hyperlink when exported to Excel
-
-    Returns
-    -------
-    df_in : pandas.DataFrame
-        DataFrame containing original dataset with additional
-        columns containing publication numbers
-
-    """
-
-def _get_pub_count(term1_list, term2_list, title_abs_only=True,
-                  return_IDs_list=False, return_link=False):
+def _get_pub_count(term1_list, term2_list, title_abs_only=False,
+                  return_IDs_list=False, return_link=True):
     if title_abs_only:
         suffix = '[TIAB]'
     else:
@@ -85,7 +23,7 @@ def _get_pub_count(term1_list, term2_list, title_abs_only=True,
         for term in term1_list[1:]:
             term1_string = '%s OR (%s%s)' % (term1_string, term, suffix)
     if term2_list[0] == '':
-        search_string = '%s' % term1_string
+        search_string = term1_string
     else:
         term2_string = '(%s%s)' % (term2_list[0], suffix)
         if len(term2_list) > 1:
@@ -93,28 +31,27 @@ def _get_pub_count(term1_list, term2_list, title_abs_only=True,
                 term2_string = '%s OR (%s%s)' % (term2_string, term, suffix)
         search_string = '(%s) AND (%s)' % (term1_string, term2_string)
     search_string = search_string.replace(' ', '+')
-    return _get_esearch_data(search_string, return_IDs_list, return_link)
+    return _get_esearch_data(search_string, return_IDs_list=False, return_link=True)
 
 
 
 def _build_args_tuples(df_in, search_terms):
-    # Build list of gene-specific search terms for each row then pass to get_pub_count function
-    # save results either in place in original df or in a copy to be returned
+    # Build list of gene-specific search terms for each row to pass to get_pub_count function
 
-    #build new df to serve as db for fetched counts data
     unique_genes = list(df_in.Gene.unique())
     print 'Building list of search strings for %d unique genes...' % len(unique_genes)
     args_tuples = []
     for gene in unique_genes:
         row = df_in[df_in.Gene == gene].reset_index().loc[0]
-        desc = str(row.Description)
         try:
-            term1_list = [str(x) for x in row.Synonyms.split(',')]
+            term1_list = [str(x) for x in row.Synonyms]
             if len(term1_list) > 0:
-                term1_list.extend([gene, desc])
-                args_tuples.append( (gene, term1_list, search_terms))
+                term1_list.append(gene)
+            else:
+                term1_list = [gene]
+            args_tuples.append( (gene, term1_list, search_terms))
         except AttributeError:
-            print 'Error getting synonyms for gene: %s' % gene
+            print 'Error getting synonyms/building search string for gene: %s' % gene
             args_tuples.append( (gene, [''], search_terms))
     return args_tuples
 
@@ -143,7 +80,7 @@ def _get_esearch_data(search_string, return_IDs_list=False, return_link=True):
 def _thread_helper_func(args_tuple):
     gene, term1_list, search_terms = args_tuple
     count, link = _get_pub_count(term1_list, search_terms, return_link=True)
-    return {'Gene': gene, 'Count_link':link}
+    return {'Gene': gene, 'Count_link':link, 'Count':count}
 
 
 def build_pubcount_df(df_in, search_terms, col_name):

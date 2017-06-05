@@ -54,6 +54,13 @@ When phosphoprotools is imported for the first time, the above three compessed f
 - Finish up comments
 - Add example ipynb
 - Add sample data for testing
+- Add easy command to update db pickels
+- Add ref seq pickle that is permanently saved, updates self
+- Add synonynms df pickle that is permanently saved, updates self
+- Fix long link problem
+- Add pubcount column with number only
+- fix publication fetch error when only searching 3 terms
+	- remove [TIAB] from each term!!!!!!
 
 ## Authors
 

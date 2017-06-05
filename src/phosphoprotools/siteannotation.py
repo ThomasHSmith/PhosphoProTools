@@ -247,7 +247,7 @@ def _identify_phosphosites_one_run(_df, phos_rs_col1, val_cols1, threshold, miss
                 df_new = _populate_site_annotation_cols(df_new, site)
         else: # if sites1 does not contain any sites
             num_rows_dropped += 1
-    print 'Dropped '+str(num_rows_dropped)+' rows that failed to meet phosRS'\
+    print 'Dropped '+str(num_rows_dropped)+' rows that failed to meet phosRS '\
     'threshold for at least one run'
     return df_new
 

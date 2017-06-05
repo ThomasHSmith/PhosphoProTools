@@ -10,24 +10,30 @@ from urllib2 import HTTPError, URLError
 from requests.exceptions import ReadTimeout
 
 
+## TODO add functionality for db saving
 def build_syns_df(_df):
     """
-
     Retrieve synonyms associated with a given protein. Synonyms
-    db was retrieved from Uniprot.org
+    db was retrieved from Uniprot.org. Option to save the db or
+    begin with a db generated from a previous analysis.
 
     Parameters
     ----------
-    protein : str
-        Protein uniprot ACC ID
+    _df : pandas.DataFrame
+        Input df containing protein IDs
+
+    save_db : str
+        String arguments for creation ('new') a saved local database
+        of synonyms or expansation ('expand') or a previously saved
+        database pickle, saved in package's /data directory
 
     Returns
     -------
-    syns : str
-        Synonyms seperated by commas
+    df_syns : pandas.DataFrame
+        Output df containing synonyms associated with input
+        df unique protein IDs
 
     """
-    #syns = DF_SYNS.ix[protein].Synonyms
     df_in = _df.copy()
     uniprot_ids = list(df_in.Protein.unique())
     print 'Getting synonyms from Uniprot for %d unique proteins.' % len(uniprot_ids)
@@ -37,7 +43,7 @@ def build_syns_df(_df):
     pool.close()
     pool.join()
     df_syns = pd.DataFrame(results)
-    df_syns['Synonyms'] = df_syns['Synonyms'].apply(lambda x: _conv_syns(x))
+    #df_syns['Synonyms'] = df_syns['Synonyms'].apply(lambda x: _conv_syns(x))
     df_syns.set_index('UniprotID', inplace=True)
     print 'Finished building synonyms table.'
     return df_syns
@@ -76,5 +82,7 @@ def _fetchUniprotSynonyms(uniprot_ID):
             if len(names) > 0:
                 for node in names:
                     syns.append(node.childNodes[0].data)
+    syns = set(syns)
+    syns = list(syns)
     return {'UniprotID':uniprot_ID, 'Synonyms':syns}
 
