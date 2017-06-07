@@ -60,7 +60,6 @@ def _fetchUniprotSynonyms(uniprot_ID):
         doc = xml.dom.minidom.parse(fp)
         fp.close()
     except HTTPError:
-        fp.close()
         print 'Caught HTTPError for %s' % uniprot_ID
         return [0]
     syns = []

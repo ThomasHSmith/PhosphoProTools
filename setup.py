@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='phosphoprotools',
-      version='0.16',
+      version='0.17',
       description='Tools for phosphoproteomics data analysis',
       long_description=('Collection of functions for processing phosphoproteomics data,'\
                        'including annotation of phospho-sites using PhosRS cutoff value,'\

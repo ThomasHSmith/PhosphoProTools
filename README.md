@@ -58,9 +58,10 @@ When phosphoprotools is imported for the first time, the above three compessed f
 - Add ref seq pickle that is permanently saved, updates self
 - Add synonynms df pickle that is permanently saved, updates self
 - Fix long link problem
-- Add pubcount column with number only
-- fix publication fetch error when only searching 3 terms
-	- remove [TIAB] from each term!!!!!!
+- ~~Add pubcount column with number only~~ *[0.16]*
+- ~~fix publication fetch error when only searching 3 terms~~ *[0.16]*
+- ~~remove [TIAB] from each term!!!!!!~~ *[0.16]*
+
 
 ## Authors
 
