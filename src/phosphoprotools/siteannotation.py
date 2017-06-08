@@ -20,7 +20,6 @@ DATA_PATH = os.path.dirname(DATA_PATH)
 def _unzip_source_file(gz_in_filepath):
     base = os.path.basename(gz_in_filepath)
     fname = '.'.join([x for x in base.split('.')[:-1]])
-#    path = os.path.dirname(gz_in_filepath)
     out_filepath = os.path.join(DATA_PATH, fname)
     with gzip.open(gz_in_filepath, 'rb') as in_file:
         with open(out_filepath, 'wb') as out_file:
@@ -358,8 +357,8 @@ def _identify_phosphosites_two_runs(_df, phos_rs_col1, val_cols1, phos_rs_col2,
 def annotate_functional_sites(_df):
     """
 
-    Annotate functional phosphosites using
-    PhosphoSitePlus database as reference
+    Crossreference PhosphoSitePlus database to identify sites which have
+    been previously reported and known functional/regulatory sites.
 
     Parameters
     ----------
@@ -369,8 +368,9 @@ def annotate_functional_sites(_df):
     Returns
     -------
     df_new : pandas.DataFrame
-        New DataFrame with additional columns
-        containing functional site data.
+        New DataFrame with additional columns reporting whether each site has
+        been previously identified and whether it is a known functional
+        (regulatory) site, based on PhosphoSitePlus database.
 
     """
 
@@ -397,9 +397,13 @@ def annotate_functional_sites(_df):
             df_new.loc[i, 'ON_PROT_INTERACT'] = 0
             df_new.loc[i, 'ON_OTHER_INTERACT'] = 0
             df_new.loc[i, 'NOTES'] = 0
+        # Determine if site has been previously reported based on
+        # ACC_ID cross-reference
         if len(DF_REPORTED[(DF_REPORTED['ACC_ID'] == protein) &
                            (DF_REPORTED['MOD_RSD'] == site)]) > 0:
             df_new.loc[i, 'Known_site'] = '+'
+        # Double check that site wasn't previously reported based
+        # this time by cross-referencing gene ID
         else:
             if len(DF_REPORTED[(DF_REPORTED['GENE'] == gene) &
                                (DF_REPORTED['MOD_RSD'] == site)]) > 0:
