@@ -1,21 +1,21 @@
-# PhosphoproteomicsAnalysis
+# Phosphoprotools
 Collection of functions for processing phosphoproteomics data, including:
 
  - Annotate phospho-sites using PhosRS cutoff value
  - Retrieve Gene/Protein synonyms from Uniprot
- - Annotate previously reported phospho-sites (as reported by PhosphoSitePlus database) 
+ - Annotate previously reported phospho-sites (as reported by PhosphoSitePlus database)
  - Annotate functional phospho-sites (as reported by PhosphoSitePlus database)
  - Statistical analysis by pi-score method for differential phosphopeptide abundance between two groups
  - Retrieve publication counts for genes with desired keywords
-               
+
 ## Getting Started
 
 #### Python Requirements
 - Python 2.7 with the following packages:
-- `Pandas` 
+- `Pandas`
 - `Tqdm`
 - `numpy`
-- `scipy.stats` 
+- `scipy.stats`
 
 Aside from Tqdm, all of these are included in the Anaconda distribution of Python 2.7 (https://www.continuum.io/downloads).  Missing packages should be installed automatically as part of the pip install of the phosphoprotools package.
 
@@ -24,7 +24,7 @@ Aside from Tqdm, all of these are included in the Anaconda distribution of Pytho
 
 #### Other Requirements
  For annotation of known/functional phosphosites, you will need to download three files from the PhosphoSitePlus database (http://www.phosphosite.org/staticDownloads.action).  After registering for a free account, download the following files to your Desktop.
- 
+
  - Phosphorylation_site_dataset.gz (all reported functional sites)
  - Phosphosite_seq.fasta.gz (reference sequences)
  - Regulatory_sites.gz (all reported functional sites)
@@ -55,9 +55,10 @@ When phosphoprotools is imported for the first time, the above three compessed f
 - Add example ipynb
 - Add sample data for testing
 - Add easy command to update db pickels
+- Workaround for long link problem (Excel's 255 character limit)
 - Add ref seq pickle that is permanently saved, updates self
-- Add synonynms df pickle that is permanently saved, updates self
-- Fix long link problem
+- ~~Add synonynms df pickle that is permanently saved, updates self~~ *[0.18]*
+
 - ~~Add pubcount column with number only~~ *[0.16]*
 - ~~fix publication fetch error when only searching 3 terms~~ *[0.16]*
 - ~~remove [TIAB] from each term!!!!!!~~ *[0.16]*

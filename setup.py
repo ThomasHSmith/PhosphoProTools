@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='phosphoprotools',
-      version='0.17',
+      version='0.18',
       description='Tools for phosphoproteomics data analysis',
       long_description=('Collection of functions for processing phosphoproteomics data,'\
                        'including annotation of phospho-sites using PhosRS cutoff value,'\
@@ -15,7 +15,6 @@ setup(name='phosphoprotools',
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2.7',
-        'Topic :: Text Processing :: Linguistic',
       ],
       url='https://github.com/ThomasHSmith/phosphoprotools',
       author='Thomas H. Smith',
