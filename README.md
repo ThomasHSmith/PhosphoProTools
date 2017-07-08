@@ -55,13 +55,14 @@ When phosphoprotools is imported for the first time, the above three compessed f
 - Add example ipynb
 - Add sample data for testing
 - Add easy command to update db pickels
+- - Add reference sequences pickle that is permanently saved/updates self
 - Workaround for long link problem (Excel's 255 character limit)
-- Add ref seq pickle that is permanently saved, updates self
 - ~~Add synonynms df pickle that is permanently saved, updates self~~ *[0.18]*
 
 - ~~Add pubcount column with number only~~ *[0.16]*
 - ~~fix publication fetch error when only searching 3 terms~~ *[0.16]*
 - ~~remove [TIAB] from each term!!!!!!~~ *[0.16]*
+- ~~Add n-mer sequence motif output (for motif analysis)~~ *[0.19]*
 
 
 ## Authors

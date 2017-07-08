@@ -368,9 +368,8 @@ def annotate_functional_sites(_df):
     Returns
     -------
     df_new : pandas.DataFrame
-        New DataFrame with additional columns reporting whether each site has
-        been previously identified and whether it is a known functional
-        (regulatory) site, based on PhosphoSitePlus database.
+        New DataFrame with additional column containing n-mer (motif)
+        centered around phosphorylated residue
 
     """
 
@@ -411,5 +410,64 @@ def annotate_functional_sites(_df):
             else:
                 df_new.loc[i, 'Known_site'] = '-'
     return df_new
+
+
+def build_nmers(_df, n, site_residue_col='Residue', site_pos_col='Position'):
+    """
+
+    Build n-mers centered around a phosphorylation site
+
+    Parameters
+    ----------
+    _df : pandas.DataFrame
+        DataFrame containing data
+    n   : int
+        Length of n-mer, must be odd integer
+
+    Returns
+    -------
+    df_new : pandas.DataFrame
+        New DataFrame with additional column containing the
+        n-mer sequence centered around the phosphosite
+    """
+    global df_missing_seqs, DF_SEQS
+    # Build df of missing sequences using thread pool
+    # this significantly decreases processing time
+    df_new = _df.copy()
+    if n%2 != 1:
+        print 'please enter an odd value for n'
+        return df_new
+    flank_length = n/2
+    known = set(DF_SEQS.Uniprot_ID.unique())
+    targets = set(df_new.Protein.unique())
+    missing = targets - known
+    missing = list(missing)
+    if len(missing) > 0:
+        df_missing_seqs = _build_missing_seqs_df(missing)
+        DF_SEQS = DF_SEQS.append(df_missing_seqs)
+    nmer_colname = '%dmer_sequence' % n
+    pbar1 = tqdm_notebook(range(len(df_new)), total=len(df_new))
+    for i in pbar1:
+        protein = df_new.iloc[i]['Protein']
+        seq =  DF_SEQS[DF_SEQS.Uniprot_ID == protein].Sequence.values[0]
+        if len(seq) > 1:
+            site_pos = int(df_new.iloc[i][site_pos_col])
+            start_pos = site_pos - flank_length
+            stop_pos = site_pos + flank_length
+            if (start_pos >= 1):
+                subseq = seq[start_pos-1:site_pos]
+            else:
+                filler = ( (-1) * start_pos ) * '_'
+                subseq = '%s%s' % (filler, seq[:site_pos])
+            if (stop_pos < len(seq)):
+                subseq = '%s%s' % (subseq, seq[site_pos:stop_pos])
+            else:
+                filler = (stop_pos - len(seq)) * '_'
+                subseq = '%s%s%s' % (subseq, seq[site_pos:], filler)
+            df_new.loc[i, nmer_colname] = subseq
+        else:
+            df_new.loc[i, nmer_colname] = '_'*n
+    return df_new
+
 
 
