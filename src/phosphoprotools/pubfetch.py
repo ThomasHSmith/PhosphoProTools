@@ -92,6 +92,5 @@ def build_pubcount_df(df_in, search_terms, col_name):
     df_db.set_index('Gene', inplace=True)
     df_db[col_name] = df_db['Count_link']
     df_db.drop(['Count_link'], inplace=True, axis=1)
-    #df_db[col_name].apply(lambda x: _shorten_large_links(x))
     return df_db
 

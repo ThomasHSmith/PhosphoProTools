@@ -52,11 +52,11 @@ def _excel_f_test(x_array, y_array):
 def _smart_t_test(x_array, y_array):
     """
     Test the null hypothesis that two sets of values
-    are from the same population (ie they do not
+    are from the same population (eg they do not
     exhibit a statistitically significant difference)
     using either Student's t-test or Welchs's t-test if
     the the sets have equal or unequal variances (as
-    assessed by FTEST), respectively.
+    determined by FTEST), respectively.
 
     Parameters
     ----------
@@ -82,11 +82,13 @@ def _smart_t_test(x_array, y_array):
         return stats.ttest_ind(x_array, y_array, equal_var=False)[1]
 
 def _calc_log2_fc(ctrl, treated):
+    # Helper function to calculate log2 fold-change.
     fold_change = (treated/ctrl)
     return log2(fold_change)
 
 
 def _assign_alpha_value(pi_score):
+    # Helper function to assign alpha significance levels from critical values
     signif = False
     alpha_levels = [0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.0005, 0.0002, 0.0001]
     critvals = {0.05:1.1082, 0.02:1.6657, 0.01:2.1270, 0.005:2.6138, 0.002:3.29839,
@@ -137,12 +139,13 @@ def pi_score_analysis(_df, ctrl_cols, treated_cols, add_f_test_col=False, fc_rep
         containing p-values, pi-scores, and alpha significance
         levels (optional).
 
-    Examples
+    Example
     --------
     >>> from PhosphoStats import pi_score_stats
     >>> cond1_cols = ['Thr0_1', 'Thr0_2', 'Thr0_3']
     >>> cond2_cols = ['Thr5_1', 'Thr5_2', 'Thr5_3']
-    >>> df = pi_score_stats(df, cond1_cols, cond2_cols, label='Thr5')
+    >>> df = pi_score_stats(df, ctrl_cols = cond1_cols,
+            treated_cols = cond2_cols, label = 'Thr5')
 
     """
 
@@ -202,67 +205,15 @@ def pi_score_analysis(_df, ctrl_cols, treated_cols, add_f_test_col=False, fc_rep
 
 
 
-# Perform multiple hypothesis test using Benjamini-Hochberg (B-H) procedure
-# which uses p-value rankings and a target FDR cutoff to minimize
-# type 1 errors (false positives)
-# Calculate each p-value's critical value as: (i/m)*Q, where:
-# i = invidiaul p-value's rank; m = total number of tests; Q = desired false discover rate
-# then find largest p-val that is smaller than the critical value, anything above is significant
-
-def bh_procedure(_df, p_col, q_fdr):
-    """
-    *** NOT USED ***
-    Performs multiple hypothesis test using Benjamini-Hovchberg (BH)
-    procedure, which uses p-val rankings and a target FDR cutoff
-    to minize type 1 errors (false positives). Critical values are
-    determined for each p-val as: (i/m)*Q, where i = p-val rank;
-    m = total # of tests; Q = desired FDR. Test then finds largest
-    p-val that is smaller than its critical value, anything p-vals
-    above that point (e.g. smaller) are considered significant
-
-    Parameters
-    ----------
-    _df : pandas.DataFrame
-        Input DataFrame containing data to be tested
-    p_col : str
-        Label of the p-value column in the input df
-    q_fdr : int or float
-        False discovery rate (FDR) cut-off, higher
-        values will consider more samples as significant
-        lower values are more stringent
-
-    Returns
-    -------
-    df_bh : pandas.DataFrame
-        Copy of the input df containing additional columns
-        containing p-val ranks and significance as determined
-        by BH multiple hypothesis test at the given FDR.
-
-    """
-    bh_signif_label = 'BH_signif_%d' % q_fdr
-    df_bh = _df.sort_values(p_col).copy()
-    df_bh['p_rank'] = range(1, len(df_bh)+1)
-    m_val = float(len(df_bh))
-    df_bh['BH_cval'] = df_bh['p_rank'].apply(lambda i: (i/m_val)*q_fdr)
-    df_bh[bh_signif_label] = zeros(len(df_bh))
-    indices = range(len(df_bh)-1, -1, -1)
-    for index in indices:
-        if df_bh.iloc[index][p_col] < df_bh.iloc[index]['BH_cval']:
-            df_bh.loc[0:index, bh_signif_label] = 1
-            return df_bh.drop('BH_cval', axis=1)
-    return df_bh.drop('BH_cval', axis=1)
-
-
-# Calculate adjusted p-value for each row
-# Adjust p-value is equal to the lower of:
-# p_adj = (p_raw) * (m / i) , where m = total # of samples, and i = p_value rank
-# OR the p_adj value calculated for the NEXT highest ranked p value
-# If p_adj is lower than FDR, then the test is considered significant
 def calc_bh_p_adj(_df, p_raw_col, q_fdr, p_adj_colname, signif_col=False):
     """
-    *** NOT USED ***
     Performs multiple hypothesis test using Benjamini-Hovchberg (BH)
-    like above, but also assigns adjusted p-values
+    and assigns adjusted p-values.  Calculate adjusted p-value for each row.
+    Adjust p-value is equal to the lower of: p_adj = (p_raw) * (m / i),
+    where m = total # of samples, and i = p_value rank; OR the p_adj value
+    calculated for the NEXT highest ranked p value.  If p_adj is lower than FDR,
+    then the test is considered significant.
+
 
     Parameters
     ----------

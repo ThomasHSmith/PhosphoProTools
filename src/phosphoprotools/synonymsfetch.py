@@ -1,5 +1,9 @@
 # Filename: synonymsfetch.py
 # Author: Thomas H. Smith 2017
+"""
+Functions to query Uniprot.org to retrieve all synonyms for a given
+protein as specified by its Uniprot ID.
+"""
 
 from multiprocessing.dummy import Pool as ThreadPool
 import pandas as pd
@@ -43,8 +47,11 @@ def build_syns_df(_df, save_pickle=True, load_pickle=True, add_col_inplace=False
     """
     have_existing=False
     df_in = _df.copy()
+
+    # Get list of uniprot IDs from input dataframe
     uniprot_ids = list(df_in.Protein.unique())
 
+    # If option was selected, load previously created synonyms df
     if load_pickle==True:
         PICKLE_FILE = pkg_resources.resource_filename(__name__, 'data/saved_synonyms.pickle')
         print 'Attempting to load saved synonyms file...'
@@ -53,11 +60,13 @@ def build_syns_df(_df, save_pickle=True, load_pickle=True, add_col_inplace=False
             have_existing=True
             print 'Loaded saved synonyms for %d unique proteins' % len(df_syns_loaded)
             known_ids = list(df_syns_loaded.index)
+            # Determine number of proteins not represented in loaded synonyms df
             uniprot_ids = set(uniprot_ids) - set(known_ids)
             uniprot_ids = list(uniprot_ids)
         else:
             print 'Saved synonyms file not found.'
 
+    # Query uniprot for any proteins not found in loaded synonyms df
     if len(uniprot_ids) > 0:
         print 'Getting synonyms from Uniprot for %d unique proteins.' % len(uniprot_ids)
         print 'This may take several minutes...'
@@ -70,16 +79,24 @@ def build_syns_df(_df, save_pickle=True, load_pickle=True, add_col_inplace=False
         if have_existing==True:
             df_syns = df_syns_loaded.append(df_syns)
         print 'Finished building synonyms table.'
+
+        # If option was selcted, save synonyms df for future use
         if save_pickle==True:
             PICKLE_FILE = pkg_resources.resource_filename(__name__, 'data/saved_synonyms.pickle')
             df_syns.to_pickle(PICKLE_FILE)
             print 'Saved synonyms for %d unique proteins as %s' % (len(df_syns), PICKLE_FILE)
+
+        # If option was selected, add retrieved Synonyms as a new column to input df
         if add_col_inplace:
             df_in['Synonyms'] = df_in['Protein'].apply(lambda x: df_syns.loc[x, 'Synonyms'])
             print "Added 'Synonyms' column to input DataFrame"
             return df_in
+
+        # If elected not to add column in place to df, return synonyms df only
         else:
             return df_syns
+
+    # If all proteins were already represented in loaded synonyms df, do not query uniprot
     else:
         print 'All proteins were found in saved synonyms file'
         if add_col_inplace:
@@ -90,11 +107,13 @@ def build_syns_df(_df, save_pickle=True, load_pickle=True, add_col_inplace=False
             return df_syns_loaded
 
 def _conv_syns(syns):
+    # Helper function to convert list of synonyms to a comma-seperated string
     syns = ','.join([str(x) for x in syns])
     return syns
 
 
 def _fetchUniprotSynonyms(uniprot_ID):
+    # Helper function to scrape Uniprot.org for all of a protein's synonyms
     url = 'http://www.uniprot.org/uniprot/%s.xml' % uniprot_ID
     try:
         fp = urllib2.urlopen(url)

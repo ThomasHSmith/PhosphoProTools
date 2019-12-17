@@ -18,6 +18,7 @@ DATA_PATH = pkg_resources.resource_filename(__name__, 'data/Regulatory_sites')
 DATA_PATH = os.path.dirname(DATA_PATH)
 
 def _unzip_source_file(gz_in_filepath):
+    # Helper function to open compressed file and save as uncompressed
     base = os.path.basename(gz_in_filepath)
     fname = '.'.join([x for x in base.split('.')[:-1]])
     out_filepath = os.path.join(DATA_PATH, fname)
@@ -25,10 +26,11 @@ def _unzip_source_file(gz_in_filepath):
         with open(out_filepath, 'wb') as out_file:
             for line in in_file:
                 out_file.write(line)
-    print 'Extraacted compressed file to %s. Original .gz file %s can now be deleted.' % (out_filepath, gz_in_filepath)
+    print 'Extracted compressed file to %s. Original .gz file %s can now be deleted.' % (out_filepath, gz_in_filepath)
     return out_filepath
 
 def _find_file(_infile):
+    # Helper function to locate PhosphoSite.org phosphorylation site annotation data file
     # First check if PhosphoSite data file is in package's /data directory
     _fpath = pkg_resources.resource_filename(__name__, _infile)
     if os.path.isfile(_fpath):
@@ -53,7 +55,7 @@ def _find_file(_infile):
                   'staticDownloads.action and place file on Desktop' % _infile)
             return 0
 
-# import reference sequences DataFrame
+# Import reference sequences DataFrame
 print '\nLoading reference sequences...'
 pickle = pkg_resources.resource_filename(__name__, 'data/Phosphosite_seq.fasta.pickle')
 if os.path.isfile(pickle):
@@ -88,8 +90,7 @@ else:
 
 
 def _webfetch_uniprot_seq(protein):
-    # Helper function
-    # Retrieve reference sequence for a protein from uniprot
+    # Helper function to retrieve reference sequence for a protein from uniprot
     # given the uniprot accession ID, return empty str if not found
 
     # Construct URL string pointing to uniprot fasta file
@@ -104,8 +105,8 @@ def _webfetch_uniprot_seq(protein):
         print '%s: caught HTTPError' % protein
         return ''
 
-# called by each thread
 def _thread_helper_func(protein):
+    # Helper function to multithread retrieval of protein sequences from Uniprot.org
     seq = _webfetch_uniprot_seq(protein)
     return {'Uniprot_ID': protein, 'Sequence':seq}
 
@@ -148,8 +149,9 @@ def _get_class1_sites(df_in, row_ix, rs_col_name, threshold,
                 sites.append(unsure_res)
     return sites
 
-# Helper function - search full-length protein seq for subseq and index phosph-sites in this context
 def _identify_site_in_seq(protein, subseq, site):
+    # Helper function to search full-length protein sequence for subsequence and
+    # index phosphorylation site in this context
     uniprot_seq =  DF_SEQS[DF_SEQS.Uniprot_ID == protein].Sequence.values[0]
     if len(uniprot_seq) < 5:
         return 0
@@ -180,6 +182,44 @@ def _populate_site_annotation_cols(_df, site):
 
 def process_phosphopeptides(_df, phos_rs_col1, val_cols1, threshold, missing_values=np.nan,
                             phos_rs_col2=0, val_cols2=0):
+    """
+
+    Annotate phosphosites over a specified threshold phosRS value
+    in the context of corresponding full-length protein sequences.
+    Flexibility to use data acquired from one run or two runs.  Rows with
+    multiple sites are split into multiple rows, one for each phosphosite.
+    Sites under threshold are dropped.  For sites under threshold for only
+    one run, data columns are only conserved for the run meeting the
+    threshold and imputed with zeroes or NaN for the other run.
+
+    Parameters
+    ----------
+    _df : pandas.DataFrame
+        DataFrame containing data
+    phos_rs_col1 : str
+        Name of column containing phosRS scores from run 1
+    val_cols1 : list of str
+        Names of columns containing data values from run 1
+    phos_rs_col2 : str
+        Name of column containing phosRS scores from run 2. Set to
+        0 if only using data from one run.
+    val_cols2 : list of str
+        Names of columns containing data values from run 2. Set to
+        0 if only using data from one run.
+    threshold : int
+        Minimum phosRS score to include
+    missing_values : int, str, or NaN
+        Value to impute for missing data.  Default is NaN.
+
+    Returns
+    -------
+    df_new : pandas.DataFrame
+        New DataFrame containing additional rows expanded from peptides
+        containing multiple phosphosites and additional columns containing
+        phosphosite annotation data.
+
+    """
+
     if (phos_rs_col2 != 0) & (val_cols2 != 0):
         return _identify_phosphosites_two_runs(_df, phos_rs_col1, val_cols1, threshold, missing_values,
                                         phos_rs_col2, val_cols2)
@@ -468,6 +508,3 @@ def build_nmers(_df, n, site_residue_col='Residue', site_pos_col='Position'):
         else:
             df_new.loc[i, nmer_colname] = '_'*n
     return df_new
-
-
-
